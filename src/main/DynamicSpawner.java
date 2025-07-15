@@ -16,7 +16,17 @@ public class DynamicSpawner {
     private long lastChestSpawnTime;
 
     // 间隔时间（单位：纳秒）
-    private static final long MONSTER_SPAWN_INTERVAL = 5_000_000_000L; // 5秒
+    // 删除原有的 MONSTER_SPAWN_INTERVAL 常量
+    // private static final long MONSTER_SPAWN_INTERVAL = 5_000_000_000L; // 5秒
+
+    // 新增：根据玩家等级动态计算怪物刷新间隔（单位：纳秒）
+    private long getMonsterSpawnInterval() {
+        int level = gp.player.level;
+        double intervalSec = 5.0 - (level - 1) * 0.2;
+        if (intervalSec < 1.0) intervalSec = 1.0;
+        return (long)(intervalSec * 1_000_000_000L);
+    }
+
     private static final long CHEST_SPAWN_INTERVAL = 10_000_000_000L; // 10秒
 
     public DynamicSpawner(GamePanel gp) {
@@ -44,8 +54,10 @@ public class DynamicSpawner {
 
         long currentTime = System.nanoTime();
 
+        // 动态计算怪物刷新间隔
+        long monsterInterval = getMonsterSpawnInterval();
         // 检查是否到了生成怪物的时间
-        if (currentTime - lastMonsterSpawnTime > MONSTER_SPAWN_INTERVAL) {
+        if (currentTime - lastMonsterSpawnTime > monsterInterval) {
             spawnMonster();
             lastMonsterSpawnTime = currentTime;
         }
