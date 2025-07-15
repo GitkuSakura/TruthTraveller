@@ -16,7 +16,6 @@ public class OBJ_Key extends Entity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // 设置钥匙的碰撞区域
         collision = true;
         solidArea.x = 8;
         solidArea.y = 16;

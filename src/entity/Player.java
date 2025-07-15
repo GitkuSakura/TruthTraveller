@@ -20,14 +20,10 @@ import object.OBJ_Key;
 import object.OBJ_Shield;
 
 public class Player extends Entity {
-    // GamePanel gp; // 已在父类中
-
     KeyHandler keyH;
     public final int screenX;
     public final int screenY;
-    public int hasKey = 0; // 钥匙计数器
-    // int HP = 200;
-    // int damage = 10;
+    public int hasKey = 0;
     public boolean chestIsOpen;
     public boolean bonusIsGot;
     
@@ -47,7 +43,6 @@ public class Player extends Entity {
     private static final BufferedImage PLACEHOLDER = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB);
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp);
-        // this.gp = gp; // super(gp)已完成
         this.keyH = keyH;
         screenX = gp.screenWidth/2 - (gp.tileSize/2);
         screenY = gp.screenHeight/2 - (gp.tileSize/2);

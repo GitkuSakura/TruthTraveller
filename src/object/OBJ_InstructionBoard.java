@@ -1,5 +1,3 @@
-// 文件: object/OBJ_InstructionBoard.java
-
 package object;
 
 import entity.Entity;
@@ -11,11 +9,7 @@ public class OBJ_InstructionBoard extends Entity {
 
     public OBJ_InstructionBoard(GamePanel gp) {
         super(gp);
-        // 设置这个对象的基本属性
         name = "InstructionBoard";
-
-        // 我们让这个说明板成为一个实体，玩家不能穿过去。
-        // 如果你想让玩家可以穿过它，可以把这行改为 collision = false;
         collision = true;
     }
 

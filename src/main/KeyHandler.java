@@ -22,8 +22,6 @@ public class KeyHandler implements KeyListener {
         }
     }
 
-    // 文件: main/KeyHandler.java
-
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();

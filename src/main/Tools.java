@@ -144,7 +144,3 @@ public class Tools {
         return java.util.Collections.emptyList();
     }
 }
-
-// Tools drawer = Tools.getTools("drawSubWindow");
-// drawer.execute(10, 20, 800, 600);
-// meow UwU

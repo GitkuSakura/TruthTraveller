@@ -18,7 +18,6 @@ public class OBJ_Chest extends Entity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // 设置宝箱的碰撞区域
         collision = true;
         solidArea.x = 8;
         solidArea.y = 16;

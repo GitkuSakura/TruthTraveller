@@ -16,7 +16,6 @@ public class OBJ_Sword extends Entity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // 设置剑的碰撞区域
         collision = true;
         solidArea.x = 8;
         solidArea.y = 16;

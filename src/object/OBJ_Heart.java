@@ -18,7 +18,6 @@ public class OBJ_Heart extends Entity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // 设置心的碰撞区域
         collision = true;
         solidArea.x = 8;
         solidArea.y = 16;

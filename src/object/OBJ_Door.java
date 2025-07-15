@@ -17,7 +17,6 @@ public class OBJ_Door extends Entity {
             e.printStackTrace();
         }
         collision=true;
-    // 设置门的碰撞区域
     solidArea.x = 6;
     solidArea.y = 18;
     solidArea.width = 18;

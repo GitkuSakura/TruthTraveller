@@ -1,8 +1,7 @@
-// 文件: mapeditor/MapEditor.java
 package mapeditor;
 
-import tile.Tile; // 需要导入你游戏中的Tile类
-import tile.TileManager; // 导入游戏中的TileManager以加载图片
+import tile.Tile;
+import tile.TileManager;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -31,17 +30,14 @@ public class MapEditor extends JFrame {
         initUI();
     }
 
-    // 这个方法模仿你的TileManager来加载所有瓦片图片
     private void loadTileImages() {
         tileImages = new ArrayList<>();
-        // 我们需要一个临时的GamePanel实例来创建TileManager
-        main.GamePanel tempGP = new main.GamePanel(null); // 传递null
+        main.GamePanel tempGP = new main.GamePanel(null);
         TileManager tm = new TileManager(tempGP);
         for (Tile tile : tm.tile) {
             if (tile != null) {
                 tileImages.add(tile.image);
             } else {
-                // 添加一个空的占位符，以保持索引正确
                 tileImages.add(null);
             }
         }
@@ -58,7 +54,6 @@ public class MapEditor extends JFrame {
         TilePalette tilePalette = new TilePalette(this, tileImages);
         add(tilePalette, BorderLayout.EAST);
 
-        // Menu Bar
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
 
@@ -78,12 +73,12 @@ public class MapEditor extends JFrame {
         setJMenuBar(menuBar);
 
         pack();
-        setLocationRelativeTo(null); // Center window
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
     private void createNewMap() {
-        this.mapData = new int[MAP_COLS][MAP_ROWS]; // 全部填充为0
+        this.mapData = new int[MAP_COLS][MAP_ROWS];
         mapPanel.repaint();
     }
 
@@ -138,7 +133,6 @@ public class MapEditor extends JFrame {
         }
     }
 
-    // Getter and Setter methods for child components to use
     public int getSelectedTile() { return selectedTile; }
     public void setSelectedTile(int selectedTile) { this.selectedTile = selectedTile; }
     public int[][] getMapData() { return mapData; }
@@ -147,7 +141,6 @@ public class MapEditor extends JFrame {
     public int getMapRows() { return MAP_ROWS; }
 
     public static void main(String[] args) {
-        // Run the editor
         SwingUtilities.invokeLater(MapEditor::new);
     }
 }

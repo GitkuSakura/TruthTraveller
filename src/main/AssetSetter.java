@@ -2,7 +2,7 @@ package main;
 
 import entity.NPC_Girl;
 import entity.Monster;
-import object.OBJ_InstructionBoard; // 导入我们刚刚创建的新类
+import object.OBJ_InstructionBoard;
 import object.OBJ_Key;
 import object.OBJ_Door;
 
