@@ -1,5 +1,7 @@
 package main;
 
+import java.util.List;
+
 import entity.Entity;
 
 public class CollisionChecker {
@@ -158,16 +160,18 @@ public class CollisionChecker {
         }
         return index;
     }
-    public int checkEntity(Entity entity,Entity[] target){
+    public int checkEntity(Entity entity, Entity[] target_DEPRECATED){
         int index = 999;
-        for (int i = 0; i < target.length; i++) {
-            if (target[i] != null) {
+        List<Entity> nearbyEntities = gp.spatialGrid.getNearbyEntities(entity);
+        for (Entity target : nearbyEntities) {
+            // 确保不与自身检测，且目标是我们感兴趣的类型（例如NPC）
+            if (target != entity && target.name.equals("girl") || target.name.equals("trader")) {
                 // Update the entity's solid area position
                 entity.solidArea.x = entity.worldX + entity.solidArea.x;
                 entity.solidArea.y = entity.worldY + entity.solidArea.y;
                 // Update the object's solid area position
-                target[i].solidArea.x = target[i].worldX + target[i].solidArea.x;
-                target[i].solidArea.y = target[i].worldY + target[i].solidArea.y;
+                target.solidArea.x = target.worldX + target.solidArea.x;
+                target.solidArea.y = target.worldY + target.solidArea.y;
 
                 // Adjust the entity's solid area position based on its direction
                 switch (entity.direction) {
@@ -186,16 +190,16 @@ public class CollisionChecker {
                 }
 
                 // Check for collision
-                if (entity.solidArea.intersects(target[i].solidArea)) {
+                if (entity.solidArea.intersects(target.solidArea)) {
                     entity.collisionOn=true;
-                    index = i;
+                    index = nearbyEntities.indexOf(target);
                 }
 
                 // Reset the solid area position
                 entity.solidArea.x = entity.solidAreaDefaultX;
                 entity.solidArea.y = entity.solidAreaDefaultY;
-                target[i].solidArea.x = target[i].solidAreaDefaultX;
-                target[i].solidArea.y = target[i].solidAreaDefaultY;
+                target.solidArea.x = target.solidAreaDefaultX;
+                target.solidArea.y = target.solidAreaDefaultY;
             }
         }
         return index;
