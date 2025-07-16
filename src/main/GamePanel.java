@@ -13,6 +13,7 @@ import java.awt.FontFormatException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -81,12 +82,14 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean showCharacterWindow = false;
     private BufferedImage screenBuffer;
     private Future<BufferedImage> titlePlayerImageFuture;
+    public SpatialGrid spatialGrid;
 
     public GamePanel(JFrame window) {
         this.window = window;
         loadCustomFont();
         this.ui = new UI(this);
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.spatialGrid = new SpatialGrid(worldWidth, worldHeight, tileSize * 2);
         this.setBackground(Color.DARK_GRAY);
         this.setDoubleBuffered(true);
         this.addKeyListener(keyH);
@@ -316,7 +319,15 @@ public class GamePanel extends JPanel implements Runnable {
             player.speed = devSpeed;
         }
         ui.updateMessages();
-
+        ui.updateMessages();
+        spatialGrid.clear();
+        for (Entity m : monster) {
+            if (m != null) spatialGrid.add(m);
+        }
+        for (Entity n : npc) {
+            if (n != null) spatialGrid.add(n);
+        }
+        spatialGrid.add(player);
         if (gameState == playState) {
             player.update();
             for (Entity entity : npc) {
@@ -513,28 +524,63 @@ public class GamePanel extends JPanel implements Runnable {
     public void drawGame(Graphics2D g2) {
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, screenWidth, screenHeight);
-
+    
         if (gameState == titleState) {
             ui.draw(g2);
         } else {
+            // --- 优化的绘制逻辑 ---
+    
+            // 1. 绘制地砖
             TileM.draw(g2);
-            java.util.List<Entity> allEntities = new java.util.ArrayList<>();
-            for (Entity entity : obj) if (entity != null && isObjectVisible(entity)) allEntities.add(entity);
-            for (Entity entity : npc) if (entity != null && isEntityVisible(entity)) allEntities.add(entity);
-            for (Entity entity : monster) if (entity != null && isEntityVisible(entity)) allEntities.add(entity);
-            allEntities.add(player);
-            allEntities.sort((a, b) -> Integer.compare(a.worldY, b.worldY));
-            for (Entity entity : allEntities) entity.draw(g2);
+    
+            // 2. 创建一个列表，只存储需要Y轴排序的动态实体 (NPC, Monster, Player)
+            ArrayList<Entity> characterList = new ArrayList<>();
+            
+            // 3. 绘制所有静态对象 (如宝箱、掉落物)，并收集动态角色
+            for (Entity entity : obj) {
+                if (entity != null && isObjectVisible(entity)) {
+                    // 像 instructionBoard 这种需要特殊绘制逻辑的，可以单独处理或保持原样
+                    if ("InstructionBoard".equals(entity.name)) {
+                        entity.draw(g2);
+                    } else {
+                        // 普通对象直接添加，也参与排序，以处理其在角色前后的情况
+                        characterList.add(entity);
+                    }
+                }
+            }
+            for (Entity entity : npc) {
+                if (entity != null && isEntityVisible(entity)) {
+                    characterList.add(entity);
+                }
+            }
+            for (Entity entity : monster) {
+                if (entity != null && isEntityVisible(entity)) {
+                    characterList.add(entity);
+                }
+            }
+            characterList.add(player);
+    
+            // 4. 只对这个精简后的列表进行排序
+            characterList.sort(Comparator.comparingInt(e -> e.worldY));
+    
+            // 5. 按排序后的顺序绘制
+            for (Entity entity : characterList) {
+                entity.draw(g2);
+            }
+    
+            // 6. 绘制最顶层的效果 (粒子、剑气等)，它们总是在最前面
+            particleList.removeIf(p -> p.life <= 0);
+            for (Particle p : particleList) {
+                if (isEntityVisible(p)) p.draw(g2);
+            }
             if (player.swordBeam != null && player.swordBeam.isActive() && isEntityVisible(player.swordBeam)) {
                 player.swordBeam.draw(g2);
             }
-            particleList.removeIf(p -> p.life <= 0);
-            for (Particle p : particleList) if (isEntityVisible(p)) p.draw(g2);
-
+    
+            // 7. 绘制光照和UI
             if (filterAlpha > 0f) {
                 drawLighting(g2);
             }
-
             ui.draw(g2);
         }
     }
