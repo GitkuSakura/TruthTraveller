@@ -74,17 +74,22 @@ public class Monster extends Entity {
     public Monster(GamePanel gp, int maxHealth, int attackPower) {
         super(gp);
         direction = "down";
-        speed = 2; // 怪物移动速度比玩家慢
-        // 缩小碰撞箱体积为tileSize的60%
+        int playerMaxLife = gp.player != null ? gp.player.maxLife : 10;
+        double speedCalc = 3.0;
+        int maxVal = Math.max(maxHealth, playerMaxLife);
+        if (maxVal > 0) {
+            speedCalc = 2+ (double)Math.abs(maxHealth - playerMaxLife) / maxVal;
+        }
+        if (speedCalc < 2.0) speedCalc = 2.0;
+        if (speedCalc > 3.0) speedCalc = 3.0;
+        speed = (int)Math.round(speedCalc);
         int boxSize = (int)(gp.tileSize * 0.6);
         solidArea = new Rectangle((gp.tileSize - boxSize) / 2, (gp.tileSize - boxSize) / 2, boxSize, boxSize);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
-        // 设置生命值和攻击力
         maxLife = maxHealth;
         life = maxLife;
-        attack = attackPower; // 设置怪物攻击力
-        // 设置怪物标识
+        attack = attackPower;
         name = "monster";
         getMonsterImage();
     }
@@ -291,6 +296,15 @@ public class Monster extends Entity {
             isDead = true;
             deathCounter = 0;
         }
+        int playerMaxLife = gp.player != null ? gp.player.maxLife : 10;
+        double speedCalc = 3.0;
+        int maxVal = Math.max(maxLife, playerMaxLife);
+        if (maxVal > 0) {
+            speedCalc = 3.0 - (double)Math.abs(maxLife - playerMaxLife) / maxVal;
+        }
+        if (speedCalc < 2.0) speedCalc = 2.0;
+        if (speedCalc > 3.0) speedCalc = 3.0;
+        speed = (int)Math.round(speedCalc);
         
         // 如果怪物已死亡，处理闪烁效果
         if (isDead) {
@@ -496,25 +510,22 @@ public class Monster extends Entity {
     // 检查与其他怪物的碰撞
     public void checkMonsterCollision() {
         // 如果怪物已死亡，不进行碰撞检测
-        if (isDead) {
-            return;
-        }
-        // 获取当前怪物的碰撞箱
-        Rectangle currentMonsterSolidArea = new Rectangle(
-            worldX + solidArea.x, 
-            worldY + solidArea.y, 
-            solidArea.width, 
-            solidArea.height
-        );
-        // 检查与其他怪物的碰撞
-        for (Entity otherMonster : gp.monster) {
-            if (otherMonster != null && otherMonster != this && otherMonster.life > 0) {
+        if (isDead || !monsterCollisionEnabled) return;
+
+    Rectangle currentMonsterSolidArea = new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+    
+    // 从空间网格获取附近的实体
+    List<Entity> nearbyEntities = gp.spatialGrid.getNearbyEntities(this);
+
+    for (Entity other : nearbyEntities) {
+        // 确保是怪物，且不是自己
+        if (other instanceof Monster && other != this && other.life > 0) {
                 // 获取其他怪物的碰撞箱
                 Rectangle otherMonsterSolidArea = new Rectangle(
-                    otherMonster.worldX + otherMonster.solidArea.x, 
-                    otherMonster.worldY + otherMonster.solidArea.y, 
-                    otherMonster.solidArea.width, 
-                    otherMonster.solidArea.height
+                    other.worldX + other.solidArea.x, 
+                    other.worldY + other.solidArea.y, 
+                    other.solidArea.width, 
+                    other.solidArea.height
                 );
                 // 检查碰撞
                 if (currentMonsterSolidArea.intersects(otherMonsterSolidArea)) {
@@ -530,8 +541,12 @@ public class Monster extends Entity {
     // 受到击退效果
     public void takeKnockback(String direction) {
         if (!isDead) {
-            // 计算击退距离：0.5 + 0.1 * 玩家拥有的剑数量
-            knockbackDistance = (int)((0.2 + 0.1 * gp.player.swordCount) * gp.tileSize);
+            double baseKnockback = (0.5 + 0.1 * gp.player.swordCount) * gp.tileSize;
+            double factor = 1.0;
+            if (life > 0) {
+                factor = Math.abs(life - gp.player.maxLife) / (double)life;
+            }
+            knockbackDistance = (int)(baseKnockback * factor);
             knockbackDirection = direction;
             currentKnockbackDistance = 0;
             isKnockback = true;
